@@ -18,8 +18,11 @@ class NotesScreen extends StatelessWidget {
       body: const Center(
         child: Text(
           "Notes Screen",
-          style: TextStyle(fontSize: 24),
-        ),
+          style: TextStyle(
+            fontSize: 24,
+            color: Colors.white,
+          ),
+        ) 
       ),
     );
   }

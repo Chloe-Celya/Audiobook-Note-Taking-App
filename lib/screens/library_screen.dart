@@ -76,6 +76,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
               // SEARCH BAR
 
               TextField(
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
                 onChanged: (value) {
                   setState(() {
                     searchQuery = value;

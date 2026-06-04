@@ -18,7 +18,10 @@ class SettingsScreen extends StatelessWidget {
       body: const Center(
         child: Text(
           "Settings Screen",
-          style: TextStyle(fontSize: 24),
+          style: TextStyle(
+            fontSize: 24,
+            color: Colors.white,
+          ),
         ),
       ),
     );
