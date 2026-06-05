@@ -7,6 +7,7 @@ final List<Audiobook> audiobooks = [
     author: "Matt Haig",
     cover: "assets/covers/midnight_library.png",
     category: "Fiction",
+    duration: 25.19
   ),
 
   Audiobook(
@@ -14,6 +15,7 @@ final List<Audiobook> audiobooks = [
     author: "James Clear",
     cover: "assets/covers/atomic_habits.png",
     category: "Self-Help",
+    duration: 12.00
   ),
 
   Audiobook(
@@ -21,6 +23,7 @@ final List<Audiobook> audiobooks = [
     author: "Taylor Jenkins Reid",
     cover: "assets/covers/seven_husbands.png",
     category: "Fiction",
+    duration: 54.19
   ),
 
   Audiobook(
@@ -28,6 +31,7 @@ final List<Audiobook> audiobooks = [
     author: "Frank Herbert",
     cover: "assets/covers/dune.png",
     category: "Sci-Fi",
+    duration: 75.35
   ),
 
   Audiobook(
@@ -35,6 +39,7 @@ final List<Audiobook> audiobooks = [
     author: "George Orwell",
     cover: "assets/covers/1984.png",
     category: "Sci-Fi",
+    duration: 18.49
   ),
 
   Audiobook(
@@ -42,5 +47,6 @@ final List<Audiobook> audiobooks = [
     author: "Paulo Coelho",
     cover: "assets/covers/alchemist.png",
     category: "Fiction",
+    duration: 10.01
   ),
 ];

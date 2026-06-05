@@ -157,7 +157,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
                           MaterialPageRoute(
                             builder: (_) =>
-                                const PlayerScreen(),
+                                PlayerScreen(book: book),
                           ),
                         );
                       },
