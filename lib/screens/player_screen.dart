@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../models/audiobook.dart';
+import '../models/note.dart';
 import '../widgets/bottom_nav.dart';
 
 import '../screens/library_screen.dart';
@@ -23,6 +25,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
   double totalDuration = 0.00; // minutes
   bool showSpeedMenu = false;
 
+  stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  String _currentWords = '';
+
   final List<double> speedOptions = [0.75, 1.0, 1.25, 1.5, 2.0];
 
   @override
@@ -32,6 +38,55 @@ class _PlayerScreenState extends State<PlayerScreen> {
     if (book != null) {
       _currentBook = book;
       totalDuration = book.duration;
+    }
+  }
+
+  void _toggleListening() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) {
+          if (val == 'done' || val == 'notListening') {
+            if (mounted) setState(() => _isListening = false);
+            _saveNote();
+          }
+        },
+        onError: (val) {
+          debugPrint('Speech error: $val');
+          if (mounted) setState(() => _isListening = false);
+        },
+      );
+      if (available) {
+        if (mounted) setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            if (mounted) {
+              setState(() {
+                _currentWords = val.recognizedWords;
+              });
+            }
+          },
+        );
+      }
+    } else {
+      if (mounted) setState(() => _isListening = false);
+      _speech.stop();
+      _saveNote();
+    }
+  }
+
+  void _saveNote() {
+    if (_currentWords.trim().isNotEmpty) {
+      NotesRepository.addNote(Note(
+        text: _currentWords,
+        audiobookTitle: _currentBook?.title ?? 'Unknown',
+        timestamp: sliderValue,
+      ));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vocal note saved!')),
+        );
+      }
+      _currentWords = '';
     }
   }
 
@@ -177,6 +232,23 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   ),
 
                   const SizedBox(height: 16),
+                  
+                  if (_isListening)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurpleAccent.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.deepPurpleAccent),
+                      ),
+                      child: Text(
+                        _currentWords.isEmpty ? 'Speak now...' : _currentWords,
+                        style: const TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
 
                   // SEEK BAR
                   SliderTheme(
@@ -307,11 +379,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       ),
 
 
-                      // SNIPPET
+                      // VOCAL NOTE
                       _ActionButton(
-                        label: 'Snippet',
-                        icon: Icons.mic_none,
-                        onTap: () {},
+                        label: _isListening ? 'Listening...' : 'Vocal Note',
+                        icon: _isListening ? Icons.mic : Icons.mic_none,
+                        onTap: _toggleListening,
+                        isLabelBold: _isListening,
                       ),
                     ],
                   ),
