@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "443986956737",
+    "project_id": "notetakingapp-d8c19",
+    "storage_bucket": "notetakingapp-d8c19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443986956737:android:b2c03009ed38577e51df40",
+        "android_client_info": {
+          "package_name": "com.example.flutter_audiobook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY-rBzDlVBaf_0XEdvQlZhLA9Q96V2YiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
