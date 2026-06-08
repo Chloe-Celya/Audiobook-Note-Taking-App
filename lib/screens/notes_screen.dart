@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/note.dart';
 import '../widgets/bottom_nav.dart';
+import '../models/audiobook.dart';
+import '../data/audiobooks.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
@@ -10,6 +12,9 @@ class NotesScreen extends StatefulWidget {
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  Audiobook? selectedBook;
+  final TextEditingController controller = TextEditingController();
+
   void _editNote(Note note) {
     final controller = TextEditingController(text: note.text);
     showDialog(
@@ -61,17 +66,130 @@ class _NotesScreenState extends State<NotesScreen> {
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
+  void _addManualNote() {
+  controller.clear();
+  selectedBook = null;
+
+  showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (context, setStateDialog) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF141428),
+          title: const Text(
+            "New Note",
+            style: TextStyle(color: Colors.white),
+          ),
+
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              // TEXT
+              TextField(
+                controller: controller,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: "Write your note...",
+                  hintStyle: TextStyle(color: Colors.white38),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.deepPurpleAccent),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // BOOK SELECT
+              DropdownButton<Audiobook>(
+                dropdownColor: const Color(0xFF1C1C2E),
+                value: selectedBook,
+                hint: const Text(
+                  "Select audiobook",
+                  style: TextStyle(color: Colors.white38),
+                ),
+                items: audiobooks.map((book) {
+                  return DropdownMenuItem(
+                    value: book,
+                    child: Text(
+                      book.title,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setStateDialog(() {
+                    selectedBook = value;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 12),
+            ],
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancel"),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurpleAccent,
+              ),
+              onPressed: () {
+                final text = controller.text.trim();
+
+                if (text.isNotEmpty && selectedBook != null) {
+                  setState(() {
+                    NotesRepository.addNote(
+                      Note(
+                        text: text,
+                        audiobookTitle: selectedBook!.title,
+                        timestamp: 0,
+                      ),
+                    );
+                  });
+                }
+
+                Navigator.pop(ctx);
+              },
+              child: const Text(
+                "Save",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     final notes = NotesRepository.notes;
 
     return Scaffold(
       backgroundColor: const Color(0xFF080816),
+      
       appBar: AppBar(
         title: const Text("My Notes", style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF141428),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: _addManualNote,
+          ),
+        ],
         automaticallyImplyLeading: false,
       ),
+      
       bottomNavigationBar: const BottomNav(currentIndex: 2),
       body: notes.isEmpty
           ? const Center(

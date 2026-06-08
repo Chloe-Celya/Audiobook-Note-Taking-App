@@ -31,6 +31,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   final List<double> speedOptions = [0.75, 1.0, 1.25, 1.5, 2.0];
 
+  List<Note> get markers =>
+    NotesRepository.notes
+        .where((n) => n.audiobookTitle == _currentBook?.title)
+        .toList();
+
   @override
   void initState() {
     super.initState();
@@ -103,6 +108,68 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
     return '${speed}x';
   }
+
+  void _addMarker() {
+  final controller = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFF141428),
+
+      title: const Text(
+        "Add Marker",
+        style: TextStyle(color: Colors.white),
+      ),
+
+      content: TextField(
+        controller: controller,
+        maxLines: 4,
+        style: const TextStyle(color: Colors.white),
+
+        decoration: const InputDecoration(
+          hintText: "Write your note...",
+          hintStyle: TextStyle(color: Colors.white38),
+        ),
+      ),
+
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text("Cancel"),
+        ),
+
+        ElevatedButton(
+          onPressed: () {
+
+            final text = controller.text.trim();
+
+            if (text.isNotEmpty && _currentBook != null) {
+
+
+              NotesRepository.addNote(
+                Note(
+                  text: text,
+                  audiobookTitle: _currentBook!.title,
+                  timestamp: sliderValue,
+                ),
+              );
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Marker saved"),
+                ),
+              );
+            }
+
+            Navigator.pop(ctx);
+          },
+          child: const Text("Save"),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -251,30 +318,67 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     ),
 
                   // SEEK BAR
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: Colors.deepPurpleAccent,
-                      inactiveTrackColor: Colors.white24,
-                      thumbColor: Colors.deepPurpleAccent,
-                      trackHeight: 3.0,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 6,
-                      ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 14,
-                      ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SizedBox(
+                        height: 40,
+                        child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: Colors.deepPurpleAccent,
+                            inactiveTrackColor: Colors.white24,
+                            thumbColor: Colors.deepPurpleAccent,
+                            trackHeight: 3.0,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 14,
+                            ),
+                          ),
+
+                          child: Slider(
+                            value: sliderValue,
+                            min: 0,
+                            max: totalDuration,
+                            onChanged: (value) {
+                              setState(() {
+                                sliderValue = value;
+                              });
+                            },
+                          ),
+                        ),
+
+                        // MARKERS 
+                        ...NotesRepository.notes
+                            .where((n) => n.audiobookTitle == _currentBook?.title)
+                            .map((note) {
+
+                          final position = totalDuration == 0
+                              ? 0.0
+                              : note.timestamp / totalDuration;
+
+                          return Positioned(
+                            left: constraints.maxWidth * position,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
                     ),
-                    child: Slider(
-                      value: sliderValue,
-                      min: 0,
-                      max: totalDuration,
-                      onChanged: (value) {
-                        setState(() {
-                          sliderValue = value;
-                        });
-                      },
-                    ),
-                  ),
+                  );
+                },
+              ),
+                  
 
                   // TIME LABELS
                   Padding(
@@ -375,7 +479,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       _ActionButton(
                         label: 'Add Marker',
                         icon: Icons.location_on,
-                        onTap: () {},
+                        onTap: _addMarker,
                       ),
 
 
