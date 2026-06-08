@@ -3,11 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/library_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
   }
